@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "471007651197",
+    "project_id": "reactassignment-bdede",
+    "storage_bucket": "reactassignment-bdede.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:471007651197:android:a1892fe2ae145283589814",
+        "android_client_info": {
+          "package_name": "com.awesomeproject"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "471007651197-4eb6mrr2etsd5pg51rg0dql3pmgsdpbb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBm-faucrWylojXmDxVrzA_-iS1hcygu2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "471007651197-4eb6mrr2etsd5pg51rg0dql3pmgsdpbb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
