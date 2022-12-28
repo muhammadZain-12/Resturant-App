@@ -9,6 +9,7 @@ import User from "../screens/user";
 import AddMenu from "../screens/addMenu";
 import AddItems from "../screens/addItem";
 import AddDeals from "../screens/addDeals";
+import ViewMenu from "../screens/viewMenu";
 
 
 const Stack = createNativeStackNavigator();
@@ -29,6 +30,7 @@ const AppNavigation   = () => {
           <Stack.Screen options={{headerShown:false}}  name="addMenu" component={AddMenu} />
           <Stack.Screen options={{headerShown:false}}  name="addItem" component={AddItems} />
           <Stack.Screen options={{headerShown:false}}  name="addDeal" component={AddDeals} />
+          <Stack.Screen options={{headerShown:false}}  name="viewMenu" component={ViewMenu} />
         </Stack.Navigator>
       </NavigationContainer>
       </>

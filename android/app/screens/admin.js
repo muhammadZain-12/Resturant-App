@@ -27,7 +27,7 @@ const routeToOtherPage = (route) => {
                     View Bookings
                 </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={{backgroundColor:"skyblue",width:"90%",padding:20,borderRadius:10,marginTop:10}}  >
+            <TouchableOpacity onPress={()=>routeToOtherPage('viewMenu')}  style={{backgroundColor:"skyblue",width:"90%",padding:20,borderRadius:10,marginTop:10}}  >
                 <Text style={{color:"black",textAlign:"center",fontSize:20,fontWeight:"700"}} >
                     View Menu
                 </Text>
