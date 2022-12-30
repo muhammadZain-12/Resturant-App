@@ -29,10 +29,14 @@ function SignUp({navigation}) {
     category : "user"
   }
 
+
+
+
   const [signUpData, setSignUpData] = useState(initialData);
 
   const sendDatatoDb = () => {
     const {userName, email, password,category} = signUpData;
+    console.log(signUpData,"sign")
     
     let flag = Object.values(signUpData)
     let flag1 = flag.some((e,i)=>e=="")
@@ -41,11 +45,16 @@ function SignUp({navigation}) {
       }
       else{
         setLoader(true)
+
+
+        console.log(signUpData)
+
     auth()
     .createUserWithEmailAndPassword(email, password)
     
       .then(success => {
         const user = success.user;
+        console.log(user)
         if (user) {
           const {userName, email,category} = signUpData;
     database()

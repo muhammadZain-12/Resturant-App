@@ -4,13 +4,13 @@ import {
   Text,
   ScrollView,
   FlatList,
-  TouchableHighlight,
   TouchableOpacity,
   Image,
 } from 'react-native';
 import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
 import database from '@react-native-firebase/database';
+import Header from '../components/header';
 
 function ViewMenu({navigation, route}) {
   const [itemData, setItemData] = React.useState([]);
@@ -24,7 +24,11 @@ function ViewMenu({navigation, route}) {
       .ref('items')
       .once('value', e => {
         let val = e.val();
-        val = Object.values(val);
+
+        val = Object.entries(val).map(([key,value])=>{
+            value.id = key
+            return value
+        })
 
         setItemData(val);
       });
@@ -59,6 +63,17 @@ function ViewMenu({navigation, route}) {
         )
       : setEditData(data);
   }, [data]);
+
+  useEffect(() => {
+    data && data.delete
+      && setItemData(
+          itemData.filter((e, i) => {
+            return e.id !== data.id;
+          }),
+        )
+      
+  }, [data]);
+
 
   useEffect(() => {
     editData &&
@@ -157,7 +172,10 @@ function ViewMenu({navigation, route}) {
   };
 
   return (
-    <View style={{width: '100%', height: '100%', padding: 20}}>
+    <View style={{width: '100%', height: '100%', padding: 15,paddingVertical:10}}>
+    
+    <Header back dark navigation={navigation}  />
+    <ScrollView  >
       <View style={{width: '100%', alignItems: 'center'}}>
         <Text style={{fontSize: 25, color: 'black'}}>Resturant Menu</Text>
         <Text style={{fontSize: 16, color: 'red', textAlign: 'center'}}>
@@ -186,6 +204,7 @@ function ViewMenu({navigation, route}) {
         Deals
       </Text>
       <FlatList data={dealData} renderItem={renderItems} horizontal={true} />
+      </ScrollView>
     </View>
   );
 }

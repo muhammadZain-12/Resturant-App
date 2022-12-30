@@ -1,9 +1,13 @@
 import React from "react"
 import { View,Text, TouchableOpacity } from "react-native"
+import Header from "../components/header"
 
 function AddMenu ({navigation}) {
     return(
         <View style={{width:"100%",height:"100%",justifyContent:"center",backgroundColor:'aqua'}} >
+                <View style={{position:"absolute",top:10,left:15}} >
+                <Header back dark navigation={navigation} />
+                </View>
             <Text style={{color:"black",textAlign:"center",fontSize:24,fontWeight:"700"}} >
                 Add Menu
             </Text>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import database from '@react-native-firebase/database';
+import Header from '../components/header';
 
-function AddDeals({navigation,route}) {
+function AddDeals({navigation, route}) {
   const [items, setItems] = React.useState([]);
   const [dealItems, setDealItems] = React.useState([]);
-  const [routeData,setRouteData] = React.useState([])
-  const [data,setData] = React.useState([])
+  const [routeData, setRouteData] = React.useState([]);
+  const [data, setData] = React.useState([]);
 
   const initialData = {
     dealName: '',
@@ -26,14 +27,12 @@ function AddDeals({navigation,route}) {
 
   const [dealDetail, setdealDetail] = React.useState(initialData);
 
+  const myData = route.params;
 
-const myData = route.params
-
-useEffect(()=>{
-    setData(myData)
-    myData &&  setRouteData(myData.dealItem)
-},[])
-
+  useEffect(() => {
+    setData(myData);
+    myData && setRouteData(myData.dealItem);
+  }, []);
 
   React.useEffect(() => {
     database()
@@ -48,7 +47,7 @@ useEffect(()=>{
       });
   }, []);
 
-  const addItemsInDeals = (items) => {
+  const addItemsInDeals = items => {
     let flag = dealItems && dealItems.some((e, i) => e.id == items.id);
     if (dealItems && dealItems.length > 0 && flag) {
       setDealItems(
@@ -57,21 +56,18 @@ useEffect(()=>{
             if (e.id === items.id) {
               return {
                 ...e,
-                count: e.count = e.count + 1
+                count: (e.count = e.count + 1),
               };
             } else return e;
           }),
       );
     } else {
-      
       items.count = 1;
       setDealItems([...dealItems, items]);
     }
   };
 
-
-  const addEditDealsItems = (items) => {
-
+  const addEditDealsItems = items => {
     let flag = routeData && routeData.some((e, i) => e.id == items.id);
     if (routeData && routeData.length > 0 && flag) {
       setRouteData(
@@ -86,17 +82,18 @@ useEffect(()=>{
           }),
       );
     } else {
-      
       items.count = 1;
       setRouteData([...routeData, items]);
     }
-  }
+  };
 
   const RenderItem = ({item}) => {
-    console.log(myData,"data")
+    console.log(myData, 'data');
     return (
       <TouchableOpacity
-        onPress={() => !myData  ? addItemsInDeals(item) : addEditDealsItems(item) }
+        onPress={() =>
+          !myData ? addItemsInDeals(item) : addEditDealsItems(item)
+        }
         style={{
           width: '100%',
           backgroundColor: 'skyblue',
@@ -111,12 +108,8 @@ useEffect(()=>{
     );
   };
 
-
   const dealSubmittedToDb = () => {
-
-
-    dealDetail.dealItem = dealItems
-
+    dealDetail.dealItem = dealItems;
 
     const flag = Object.values(dealDetail);
     let flag1 = flag.some((e, i) => e == '');
@@ -130,7 +123,7 @@ useEffect(()=>{
         .then(success => {
           ToastAndroid.show('Deal Successfully Added', ToastAndroid.SHORT);
           setdealDetail(initialData);
-          setDealItems([])
+          setDealItems([]);
         })
         .catch(error => {
           console.log(error);
@@ -138,119 +131,112 @@ useEffect(()=>{
     }
   };
 
-
-const lessItem = (value,index) => {
-
-
-
-    if(value.count == 1){
-        setDealItems(dealItems.filter((e,i)=>{
-            return i !== index
-        }))
-    }
-    else{
-        setDealItems(dealItems.map((e,i)=>{
-            if(index===i){
-                return {
-                    ...e,
-                    count : e.count = e.count -1
-                }
-            }
-
-            else {
-                return e
-            }
-
-        }))
-    }
-
-}
-
-const AddItem = (value,index) => {
-
-    setDealItems(dealItems.map((e,i)=>{
-            if(index==i){
-                return {
-                    ...e,
-                    count : e.count + 1
-                }
-            }
-            else{
-                return e
-            }
-    }))
-
-
-}
-
-
-const AddEditDealItem = (e,i) => {
-        console.log(i,i)
-    setRouteData(routeData.map((value,ind)=>{
-        console.log(ind,"index")
-        if(ind===i){
+  const lessItem = (value, index) => {
+    if (value.count == 1) {
+      setDealItems(
+        dealItems.filter((e, i) => {
+          return i !== index;
+        }),
+      );
+    } else {
+      setDealItems(
+        dealItems.map((e, i) => {
+          if (index === i) {
             return {
-                ...e,
-                count : e.count + 1
-            }
-
-        }
-        else{
-            return value
-        }
-    }))
-}
-
-const lessEditDealItem = (value,ind) => {
-    
-    console.log(value,"value")
-
-    if(value.count == 1) {
-        setRouteData(routeData.filter((e,i)=>{
-            return e.id !== value.id
-        }))
+              ...e,
+              count: (e.count = e.count - 1),
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
     }
-    
-    else{
-    
-        setRouteData(routeData.map((e,i)=>{
-            if(ind==i){
-                return {
-                    ...e,
-                    count : e.count - 1
-                }
-            }
-            else{
-                return e
-            }
-        }))
-    
+  };
+
+  const AddItem = (value, index) => {
+    setDealItems(
+      dealItems.map((e, i) => {
+        if (index == i) {
+          return {
+            ...e,
+            count: e.count + 1,
+          };
+        } else {
+          return e;
+        }
+      }),
+    );
+  };
+
+  const AddEditDealItem = (e, i) => {
+    console.log(i, i);
+    setRouteData(
+      routeData.map((value, ind) => {
+        console.log(ind, 'index');
+        if (ind === i) {
+          return {
+            ...e,
+            count: e.count + 1,
+          };
+        } else {
+          return value;
+        }
+      }),
+    );
+  };
+
+  const lessEditDealItem = (value, ind) => {
+    console.log(value, 'value');
+
+    if (value.count == 1) {
+      setRouteData(
+        routeData.filter((e, i) => {
+          return e.id !== value.id;
+        }),
+      );
+    } else {
+      setRouteData(
+        routeData.map((e, i) => {
+          if (ind == i) {
+            return {
+              ...e,
+              count: e.count - 1,
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
     }
+  };
 
-}
+  const editDealDataInDb = () => {
+    data.dealItem = routeData;
+    data.edit = true;
 
-
-
-const editDealDataInDb = () => {
-
-    
-    data.dealItem = routeData
-    data.edit = true
-
-    database().ref('Deals/' + data.id).set(data).then((success)=>{
-
-        ToastAndroid.show('Data Successfully Edit',ToastAndroid.SHORT)
-        navigation.navigate('viewMenu',data)
-        setData([])
-
-    }).catch((error)=>{
-        console.log(error)
-    })
-
-}
+    database()
+      .ref('Deals/' + data.id)
+      .set(data)
+      .then(success => {
+        ToastAndroid.show('Data Successfully Edit', ToastAndroid.SHORT);
+        navigation.navigate('viewMenu', data);
+        setData([]);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   return (
     <View style={{width: '100%', height: '100%', alignItems: 'center'}}>
+      <Header
+        back
+        navigation={navigation}
+        dark
+        style={{marginLeft: 15, marginTop: 5}}
+      />
+
       <Text
         style={{
           color: 'black',
@@ -263,8 +249,12 @@ const editDealDataInDb = () => {
       </Text>
 
       <TextInput
-        onChangeText={e => data && data.dealItem ? setData({...data,dealName:e}) : setdealDetail({...dealDetail, dealName: e})}
-        placeholder= {data ? data.dealName : "Deal Name"}
+        onChangeText={e =>
+          data && data.dealItem
+            ? setData({...data, dealName: e})
+            : setdealDetail({...dealDetail, dealName: e})
+        }
+        placeholder={data ? data.dealName : 'Deal Name'}
         value={data ? data.dealName : dealDetail.dealName}
         placeholderTextColor="black"
         style={{
@@ -283,84 +273,89 @@ const editDealDataInDb = () => {
         Select below items to add in deals
       </Text>
 
-        {items&&items.length>0?
-
-      <FlatList
-        data={items}
-        renderItem={RenderItem}
-        scrollEnabled={true}
-        horizontal={false}
-        style={{
-          height: 200,
-          maxHeight: 200,
-          width: '90%',
-        }}
-      />
-      :
-      <ActivityIndicator size={200} color="skyblue" />
-      }
-      <View style={{height:200,width:"100%"}} >
-      <ScrollView
-      style={{width:"100%",height:100}}
-      
-      >
-        {data && data.dealItem ?  
-        
-        routeData.map((e,i)=>{
-            return (
-                <TouchableOpacity
-                key={i}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'aqua',
-                  padding:10,
-                  marginTop: 10,
-                  flexDirection:'row',
-                  justifyContent:"space-between",
-                  alignItems:"center"
-                }}>
-                <Text style={{color: 'black',width:"60%"}}>
-                  {e.count} {e.itemName} {e.itemSize}
-                </Text>
-                <View style={{flexDirection:"row"}} >
-                <TouchableOpacity onPress={()=>AddEditDealItem(e,i)}  ><Text style={{color:"white",fontSize:34}} > + </Text></TouchableOpacity>
-                <TouchableOpacity onPress={()=>lessEditDealItem(e,i)}  ><Text style={{color:"white",fontSize:34}} > - </Text></TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            )
-        })
-        
-        :dealItems &&
-          dealItems.length > 0 &&
-          dealItems.map((e, i) => {
-            return (
-              <TouchableOpacity
-                key={i}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'aqua',
-                  padding:10,
-                  marginTop: 10,
-                  flexDirection:'row',
-                  justifyContent:"space-between",
-                  alignItems:"center"
-                }}>
-                <Text style={{color: 'black',width:"60%"}}>
-                  {e.count} {e.itemName} {e.itemSize}
-                </Text>
-                <View style={{flexDirection:"row"}} >
-                <TouchableOpacity onPress={()=>AddItem(e,i)}  ><Text style={{color:"white",fontSize:34}} > + </Text></TouchableOpacity>
-                <TouchableOpacity onPress={()=>lessItem(e,i)}  ><Text style={{color:"white",fontSize:34}} > - </Text></TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-      </ScrollView>
+      {items && items.length > 0 ? (
+        <FlatList
+          data={items}
+          renderItem={RenderItem}
+          scrollEnabled={true}
+          horizontal={false}
+          style={{
+            height: 200,
+            maxHeight: 200,
+            width: '90%',
+          }}
+        />
+      ) : (
+        <ActivityIndicator size={200} color="skyblue" />
+      )}
+      <View style={{height: 200, width: '100%'}}>
+        <ScrollView style={{width: '100%', height: 100}}>
+          {data && data.dealItem
+            ? routeData.map((e, i) => {
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'aqua',
+                      padding: 10,
+                      marginTop: 10,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <Text style={{color: 'black', width: '60%'}}>
+                      {e.count} {e.itemName} {e.itemSize}
+                    </Text>
+                    <View style={{flexDirection: 'row'}}>
+                      <TouchableOpacity onPress={() => AddEditDealItem(e, i)}>
+                        <Text style={{color: 'white', fontSize: 34}}> + </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => lessEditDealItem(e, i)}>
+                        <Text style={{color: 'white', fontSize: 34}}> - </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            : dealItems &&
+              dealItems.length > 0 &&
+              dealItems.map((e, i) => {
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={{
+                      width: '100%',
+                      backgroundColor: 'aqua',
+                      padding: 10,
+                      marginTop: 10,
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}>
+                    <Text style={{color: 'black', width: '60%'}}>
+                      {e.count} {e.itemName} {e.itemSize}
+                    </Text>
+                    <View style={{flexDirection: 'row'}}>
+                      <TouchableOpacity onPress={() => AddItem(e, i)}>
+                        <Text style={{color: 'white', fontSize: 34}}> + </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => lessItem(e, i)}>
+                        <Text style={{color: 'white', fontSize: 34}}> - </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+        </ScrollView>
       </View>
       <TextInput
-        onChangeText={(e) => data && data.dealItem ? setData({...data,dealPrice:e}) : setdealDetail({...dealDetail,dealPrice:e})}
-        placeholder={data && data.length>0  ?data.dealPrice : "Deal Price"}
-
+        onChangeText={e =>
+          data && data.dealItem
+            ? setData({...data, dealPrice: e})
+            : setdealDetail({...dealDetail, dealPrice: e})
+        }
+        placeholder={data && data.length > 0 ? data.dealPrice : 'Deal Price'}
         value={data ? data.dealPrice : dealDetail.dealPrice}
         placeholderTextColor="black"
         style={{
@@ -371,11 +366,12 @@ const editDealDataInDb = () => {
           borderRadius: 10,
           padding: 10,
           fontSize: 20,
-          marginTop: 20,
+          marginTop: 10,
+          marginBottom: 10,
         }}
       />
       <TouchableOpacity
-        onPress={data ? editDealDataInDb :  dealSubmittedToDb}
+        onPress={data ? editDealDataInDb : dealSubmittedToDb}
         style={{
           width: '100%',
           position: 'absolute',
@@ -384,7 +380,7 @@ const editDealDataInDb = () => {
           padding: 20,
         }}>
         <Text style={{color: 'black', textAlign: 'center', fontSize: 20}}>
-          {data? "Edit Deal" : 'ADD DEAL'}
+          {data ? 'Edit Deal' : 'ADD DEAL'}
         </Text>
       </TouchableOpacity>
     </View>
