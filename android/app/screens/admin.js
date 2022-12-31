@@ -33,7 +33,7 @@ const signOut = () => {
     return (
         <View style={{flex:1}} >
             
-            <Image source={pizza} style={{width:"100%",height:"50%"}} />
+            <Image source={pizza} style={{width:"100%",height:"40%"}} />
             
             <View style={{justifyContent:"space-between",width:"100%",flexDirection:"row"}} >
             <Text style={{color:"black",fontSize:24,padding:10,textAlign:"center",fontWeight:"800",marginTop:10}} >

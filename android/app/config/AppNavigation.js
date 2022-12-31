@@ -12,6 +12,7 @@ import AddDeals from "../screens/addDeals";
 import ViewMenu from "../screens/viewMenu";
 import MenuItemDetail from "../screens/menuItemDetail";
 import auth from "@react-native-firebase/auth";
+import SingleItem from "../screens/singleItemScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +23,7 @@ const AppNavigation   = ({navigation}) => {
 const signOut = () => {
   auth().signOut().then(()=>{
     ToastAndroid.show("Sign Out Successfully",ToastAndroid.SHORT)
-      
+
   })
 }
 
@@ -44,7 +45,7 @@ const signOut = () => {
 
           <Stack.Screen options={{headerShown:false}}  name="login" component={Login} />
           <Stack.Screen options={{headerShown:false}}  name="signUp" component={Signup} />
-          <Stack.Screen options={{headerShown:false}}  name="admin" component={Admin} />
+          <Stack.Screen   name="admin" component={Admin} />
           <Stack.Screen   name="user" component={User} options={{headerStyle:{backgroundColor:"black"},title:"Home",headerTintColor: 'white', headerRight: () => (
             <Button
               onPress={signOut}
@@ -57,6 +58,7 @@ const signOut = () => {
           <Stack.Screen options={{headerShown:false}}  name="addDeal" component={AddDeals} />
           <Stack.Screen options={{headerShown:false}}  name="viewMenu" component={ViewMenu} />
           <Stack.Screen options={{headerShown:false}}  name="menuItemDetail" component={MenuItemDetail} />
+          <Stack.Screen options={{headerShown:false}}  name="singleItem" component={SingleItem} />
         </Stack.Navigator>
       </NavigationContainer>
       </>

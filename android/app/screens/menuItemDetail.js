@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Image, TouchableOpacity, ToastAndroid} from 'react-native';
+import {View, Text, Image, TouchableOpacity, ToastAndroid, ScrollView} from 'react-native';
 import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
 import database from '@react-native-firebase/database';
@@ -56,6 +56,7 @@ function MenuItemDetail({route, navigation}) {
 
   return deal && deal.dealItem ? (
     <View>
+    <ScrollView>
       <Image source={pizza} style={{width: '100%', height: 250}} />
       <Header back navigation={navigation} style={{position:"absolute",top:10,left:15}} />
       <View style={{padding: 10}}>
@@ -140,13 +141,14 @@ function MenuItemDetail({route, navigation}) {
         </TouchableOpacity>
         <TouchableOpacity></TouchableOpacity>
       </View>
+      </ScrollView>
     </View>
   ) : (
 
     
 
     <View>
-
+    <ScrollView>
     <Image source={item.itemCategory=="Pizza"?pizza : coldDrink} style={{width: '100%', height: 250}} />
     <Header back navigation={navigation} style={{position:"absolute",top:10,left:15}} />
     <View style={{padding: 10}}>
@@ -226,7 +228,8 @@ function MenuItemDetail({route, navigation}) {
             Delete Item
           </Text>
         </TouchableOpacity>
-        
+            
+        </ScrollView>
 
     </View>
   );
