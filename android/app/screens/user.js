@@ -9,6 +9,7 @@ import {
   Dimensions,
   ScrollView,
   ViewBase,
+  ToastAndroid,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
@@ -17,6 +18,8 @@ import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
 
 function User({navigation, route}) {
+  let data = route.params;
+
   const [userData, setUserData] = React.useState([]);
   const [itemCategory, setItemCategory] = React.useState({
     title: '',
@@ -34,6 +37,8 @@ function User({navigation, route}) {
   const [allData, setAllData] = React.useState([]);
   const [width, setWidth] = React.useState('');
   const [inputValue, setInputValue] = React.useState('');
+  const [orderData, setOrderData] = React.useState([]);
+  const [totalBill,setTotalBill] = React.useState(0)
 
   useEffect(() => {
     auth().onAuthStateChanged(user => {
@@ -49,6 +54,35 @@ function User({navigation, route}) {
     let widths = Dimensions.get('window').width;
     setWidth(widths);
   }, []);
+
+  useEffect(() => {
+    
+    if (
+      data &&
+      orderData &&
+      orderData.length > 0 &&
+      orderData.some((e, i) => e.id == data.id)
+    ) {
+      setOrderData(
+        orderData.map((e, i) => {
+          console.log(e, 'eeee');
+          if (e.id == data.id) {
+            return {
+              ...e,
+              count: e.count + 1,
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
+    } else {
+      if ((data && data.itemName) || data.dealName) {
+        data.count = 1;
+        setOrderData([...orderData, data]);
+      }
+    }
+  }, [data]);
 
   const getCategoryFromDb = () => {
     database()
@@ -220,6 +254,71 @@ function User({navigation, route}) {
 
   let index = 0;
 
+  const getOrderFromUser = item => {
+    let flag = orderData.some((e, i) => {
+      console.log(e.id, item.id);
+      return e.id == item.id;
+    });
+
+    if (orderData && orderData.length > 0 && flag) {
+      setOrderData(
+        orderData.map((e, i) => {
+          if (e.id == item.id) {
+            return {
+              ...e,
+              count: e.count + 1,
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
+    } else {
+      item.count = 1;
+      setOrderData([...orderData, item]);
+    }
+  };
+
+  const addItems = item => {
+    console.log(item);
+
+    setOrderData(
+      orderData.map((e, i) => {
+        if (e.id == item.id) {
+          return {
+            ...e,
+            count: e.count + 1,
+          };
+        } else {
+          return e;
+        }
+      }),
+    );
+  };
+
+  const lessItems = item => {
+    if (item.count == 1) {
+      setOrderData(
+        orderData.filter((e, i) => {
+          return e.id !== item.id;
+        }),
+      );
+    } else {
+      setOrderData(
+        orderData.map((e, i) => {
+          if (e.id == item.id) {
+            return {
+              ...e,
+              count: e.count - 1,
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
+    }
+  };
+
   const RenderAllData = useCallback(
     e => {
       return (
@@ -237,7 +336,7 @@ function User({navigation, route}) {
             source={e.itemCategory == 'Cold drink' ? coldDrink : pizza}
             style={{
               width: 170,
-              height: 140,
+              height: 120,
               borderTopLeftRadius: 10,
               borderTopRightRadius: 10,
             }}
@@ -273,12 +372,59 @@ function User({navigation, route}) {
               numberOfLines={1}>
               {e.dealPrice ? e.dealPrice : e.itemPrice}
             </Text>
+            <View style={{alignItems: 'center', marginVertical: 5}}>
+              <TouchableOpacity
+                onPress={() => getOrderFromUser(e)}
+                style={{
+                  backgroundColor: 'black',
+                  padding: 10,
+                  borderRadius: 10,
+                  width: '90%',
+                }}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: 'white',
+                    fontWeight: '700',
+                  }}>
+                  Add to Cart
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </TouchableOpacity>
       );
     },
-    [allData],
+    [allData, orderData],
   );
+
+
+
+
+  let b  = 0
+    
+
+    orderData && orderData.length>=1 && orderData.map((e,i)=>{
+          let a = 0
+          if(e.itemPrice&&e.itemPrice.includes('Rs')||e.dealPrice&&e.dealPrice.includes('Rs') && e.itemPrice&&e.itemPrice.length==8||e.dealPrice&&e.dealPrice.length==8){
+            a = e.itemPrice?e.itemPrice.slice(3,6):e.dealPrice.slice(3,6)
+            b = b  + Number(a)*e.count
+          }
+          else if(e.itemPrice&&e.itemPrice.includes('Rs')||e.dealPrice&&e.dealPrice.includes('Rs') && e.itemPrice&&e.itemPrice.length==9||e.dealPrice&&e.dealPrice.length==9){
+            a = e.itemPrice?e.itemPrice.slice(3,7):e.dealPrice.slice(3,7)
+            b = b + Number(a)*e.count
+          }
+          else{
+            b = b + Number(e.itemPrice?e.itemPrice:e.dealPrice)*e.count
+          }
+          
+          
+        }
+        
+        )
+         
+
+
 
   return (
     <View>
@@ -369,6 +515,94 @@ function User({navigation, route}) {
               renderItem={renderItem}
               style={{marginTop: 10, width: '100%', marginLeft: 20}}
             />
+          )}
+        </View>
+
+        <View style={{marginTop: 10, alignItems: 'center',backgroundColor:"lightblue"}}>
+        {orderData && orderData.length>0 && <Text style={{fontSize:28,textAlign:'center',fontWeight:"800",color:"black"}} >Your Order</Text>}
+          {orderData &&
+            orderData.length > 0 &&
+            orderData.map((e, i) => {
+              return (
+                <TouchableOpacity
+                  style={{
+                    width: '100%',
+                    borderWidth: 1,
+                    borderColor: 'skyblue',
+                    padding: 10,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{color: 'black', fontSize: 18}}>
+                    {' '}
+                    {e.count} {e.itemName ?? e.dealName} {e.itemSize}{' '}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      width: '20%',
+                      justifyContent: 'space-between',
+                    }}>
+                    <TouchableOpacity onPress={() => addItems(e)}>
+                      <Text
+                        style={{
+                          color: 'black',
+                          fontSize: 20,
+                          fontWeight: '800',
+                        }}>
+                        {' '}
+                        +{' '}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => lessItems(e)}>
+                      <Text
+                        style={{
+                          color: 'black',
+                          fontSize: 20,
+                          fontWeight: '800',
+                        }}>
+                        {' '}
+                        -{' '}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          {orderData && orderData.length > 0 && (
+
+            <View style={{width:"100%",alignItems:"center"}} >
+
+            <View style={{marginTop:5}} >
+
+              <Text style={{color:"black",fontSize:20,fontWeight:"800"}} >Total Bill: Rs {b}/-</Text>
+
+            </View>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 10,
+                borderWidth: 1,
+                backgroundColor: 'black',
+                width: '90%',
+                padding: 10,
+                borderRadius: 10,
+                marginBottom:10
+              }}>
+              <Text
+                style={{
+                  color: 'white',
+                  fontWeigth: '600',
+                  fontSize: 20,
+                  textAlign: 'center',
+                }}>
+                Place Order
+              </Text>
+            </TouchableOpacity>
+            </View>
           )}
         </View>
 
