@@ -10,12 +10,14 @@ import {
   ScrollView,
   ViewBase,
   ToastAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import Icon from 'react-native-vector-icons/AntDesign';
 import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
+import AppModal from '../components/modal';
 
 function User({navigation, route}) {
   let data = route.params;
@@ -38,12 +40,30 @@ function User({navigation, route}) {
   const [width, setWidth] = React.useState('');
   const [inputValue, setInputValue] = React.useState('');
   const [orderData, setOrderData] = React.useState([]);
-  const [totalBill,setTotalBill] = React.useState(0)
+  const [visibleModal, setVisibleModal] = React.useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState('');
+
+  const initialData = {
+    orderData: [],
+    orderPrice: '',
+    orderLocation: '',
+    paymentMethod: '',
+    userData: '',
+  };
+
+  const [bookingData, setBookingData] = React.useState(initialData);
 
   useEffect(() => {
     auth().onAuthStateChanged(user => {
       if (user) {
-        setUserData(user);
+        const {uid} = user;
+
+        database()
+          .ref('users/' + uid)
+          .once('value', e => {
+            let val = e.val();
+            setUserData(val);
+          });
       } else {
         navigation.navigate('login');
       }
@@ -56,7 +76,6 @@ function User({navigation, route}) {
   }, []);
 
   useEffect(() => {
-    
     if (
       data &&
       orderData &&
@@ -77,7 +96,7 @@ function User({navigation, route}) {
         }),
       );
     } else {
-      if ((data && data.itemName) || data.dealName) {
+      if ((data && data.itemName) || (data && data.dealName)) {
         data.count = 1;
         setOrderData([...orderData, data]);
       }
@@ -255,6 +274,7 @@ function User({navigation, route}) {
   let index = 0;
 
   const getOrderFromUser = item => {
+    console.log(item, 'item');
     let flag = orderData.some((e, i) => {
       console.log(e.id, item.id);
       return e.id == item.id;
@@ -274,8 +294,11 @@ function User({navigation, route}) {
         }),
       );
     } else {
-      item.count = 1;
-      setOrderData([...orderData, item]);
+      if (item) {
+        item.count ? item.count + 1 : (item.count = 1);
+
+        setOrderData([...orderData, item]);
+      }
     }
   };
 
@@ -398,33 +421,63 @@ function User({navigation, route}) {
     [allData, orderData],
   );
 
+  let b = 0;
 
+  orderData &&
+    orderData.length >= 1 &&
+    orderData.map((e, i) => {
+      let a = 0;
+      if (
+        (e.itemPrice && e.itemPrice.includes('Rs')) ||
+        (e.dealPrice &&
+          e.dealPrice.includes('Rs') &&
+          e.itemPrice &&
+          e.itemPrice.length == 8) ||
+        (e.dealPrice && e.dealPrice.length == 8)
+      ) {
+        a = e.itemPrice ? e.itemPrice.slice(3, 6) : e.dealPrice.slice(3, 6);
+        b = b + Number(a) * e.count;
+      } else if (
+        (e.itemPrice && e.itemPrice.includes('Rs')) ||
+        (e.dealPrice &&
+          e.dealPrice.includes('Rs') &&
+          e.itemPrice &&
+          e.itemPrice.length == 9) ||
+        (e.dealPrice && e.dealPrice.length == 9)
+      ) {
+        a = e.itemPrice ? e.itemPrice.slice(3, 7) : e.dealPrice.slice(3, 7);
+        b = b + Number(a) * e.count;
+      } else {
+        b = b + Number(e.itemPrice ? e.itemPrice : e.dealPrice) * e.count;
+      }
+    });
 
+  const orderPlaceForBooking = () => {
+    setVisibleModal(true);
+  };
 
-  let b  = 0
-    
+  if (bookingData.orderData.length > 0) {
+    console.log('myname');
+  }
 
-    orderData && orderData.length>=1 && orderData.map((e,i)=>{
-          let a = 0
-          if(e.itemPrice&&e.itemPrice.includes('Rs')||e.dealPrice&&e.dealPrice.includes('Rs') && e.itemPrice&&e.itemPrice.length==8||e.dealPrice&&e.dealPrice.length==8){
-            a = e.itemPrice?e.itemPrice.slice(3,6):e.dealPrice.slice(3,6)
-            b = b  + Number(a)*e.count
-          }
-          else if(e.itemPrice&&e.itemPrice.includes('Rs')||e.dealPrice&&e.dealPrice.includes('Rs') && e.itemPrice&&e.itemPrice.length==9||e.dealPrice&&e.dealPrice.length==9){
-            a = e.itemPrice?e.itemPrice.slice(3,7):e.dealPrice.slice(3,7)
-            b = b + Number(a)*e.count
-          }
-          else{
-            b = b + Number(e.itemPrice?e.itemPrice:e.dealPrice)*e.count
-          }
-          
-          
-        }
-        
-        )
-         
+  const closeModal = paymentMethod => {
+    if (paymentMethod) {
+      setSelectedPaymentMethod(paymentMethod);
 
+      bookingData.orderData = orderData;
+      bookingData.orderPrice = b;
+      bookingData.userData = userData;
+      bookingData.paymentMethod = paymentMethod;
 
+      paymentMethod == 'Cash on Delivery' &&  
+        navigation.navigate('mapScreen', bookingData);
+        setOrderData([])
+        setBookingData(initialData)
+        setVisibleModal(false);
+    } else {
+      setVisibleModal(false);
+    }
+  };
 
   return (
     <View>
@@ -509,17 +562,36 @@ function User({navigation, route}) {
               style={{marginTop: 10, width: '100%', marginLeft: 20}}
             />
           ) : (
+            allCategory&&allCategory.length>0?
             <FlatList
               data={allCategory}
               horizontal={true}
               renderItem={renderItem}
               style={{marginTop: 10, width: '100%', marginLeft: 20}}
             />
+            :
+            <ActivityIndicator color="green" size={300} />
+            
           )}
         </View>
 
-        <View style={{marginTop: 10, alignItems: 'center',backgroundColor:"lightblue"}}>
-        {orderData && orderData.length>0 && <Text style={{fontSize:28,textAlign:'center',fontWeight:"800",color:"black"}} >Your Order</Text>}
+        <View
+          style={{
+            marginTop: 10,
+            alignItems: 'center',
+            backgroundColor: 'lightblue',
+          }}>
+          {orderData && orderData.length > 0 && (
+            <Text
+              style={{
+                fontSize: 28,
+                textAlign: 'center',
+                fontWeight: '800',
+                color: 'black',
+              }}>
+              Your Order
+            </Text>
+          )}
           {orderData &&
             orderData.length > 0 &&
             orderData.map((e, i) => {
@@ -573,38 +645,39 @@ function User({navigation, route}) {
               );
             })}
           {orderData && orderData.length > 0 && (
+            <View style={{width: '100%', alignItems: 'center'}}>
+              <View style={{marginTop: 5}}>
+                <Text style={{color: 'black', fontSize: 20, fontWeight: '800'}}>
+                  Total Bill: Rs {b}/-
+                </Text>
+              </View>
 
-            <View style={{width:"100%",alignItems:"center"}} >
-
-            <View style={{marginTop:5}} >
-
-              <Text style={{color:"black",fontSize:20,fontWeight:"800"}} >Total Bill: Rs {b}/-</Text>
-
-            </View>
-
-            <TouchableOpacity
-              style={{
-                marginTop: 10,
-                borderWidth: 1,
-                backgroundColor: 'black',
-                width: '90%',
-                padding: 10,
-                borderRadius: 10,
-                marginBottom:10
-              }}>
-              <Text
+              <TouchableOpacity
                 style={{
-                  color: 'white',
-                  fontWeigth: '600',
-                  fontSize: 20,
-                  textAlign: 'center',
-                }}>
-                Place Order
-              </Text>
-            </TouchableOpacity>
+                  marginTop: 10,
+                  borderWidth: 1,
+                  backgroundColor: 'black',
+                  width: '90%',
+                  padding: 10,
+                  borderRadius: 10,
+                  marginBottom: 10,
+                }}
+                onPress={orderPlaceForBooking}>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontWeigth: '600',
+                    fontSize: 20,
+                    textAlign: 'center',
+                  }}>
+                  Place Order
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
+
+        {visibleModal && <AppModal close={closeModal} visible={visibleModal} />}
 
         {mainCategory.items ? (
           <View style={{width: '100%', alignItems: 'center'}}>

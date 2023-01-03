@@ -46,7 +46,7 @@ const signOut = () => {
             </TouchableOpacity>
             </View>
             <View style={{width:"100%",alignItems:"center",marginTop:10}} >
-            <TouchableOpacity style={{backgroundColor:"skyblue",width:"90%",padding:20,borderRadius:10}}  >
+            <TouchableOpacity onPress={()=>routeToOtherPage('orderBookedData')} style={{backgroundColor:"skyblue",width:"90%",padding:20,borderRadius:10}}  >
                 <Text style={{color:"black",textAlign:"center",fontSize:20,fontWeight:"700"}} >
                     View Bookings
                 </Text>
