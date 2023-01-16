@@ -18,10 +18,13 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
 import AppModal from '../components/modal';
+import AntDesign from "react-native-vector-icons/AntDesign"
+
 
 function User({navigation, route}) {
   let data = route.params;
 
+  
   const [userData, setUserData] = React.useState([]);
   const [itemCategory, setItemCategory] = React.useState({
     title: '',
@@ -42,7 +45,8 @@ function User({navigation, route}) {
   const [orderData, setOrderData] = React.useState([]);
   const [visibleModal, setVisibleModal] = React.useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState('');
-
+  const [favouriteItems,setFavouriteItems] = React.useState([])
+  
   const initialData = {
     orderData: [],
     orderPrice: '',
@@ -51,12 +55,15 @@ function User({navigation, route}) {
     userData: '',
   };
 
+  console.log(userData,"user")
+
   const [bookingData, setBookingData] = React.useState(initialData);
 
   useEffect(() => {
     auth().onAuthStateChanged(user => {
       if (user) {
         const {uid} = user;
+        setUserData({...userData,id:uid})
 
         database()
           .ref('users/' + uid)
@@ -76,6 +83,7 @@ function User({navigation, route}) {
   }, []);
 
   useEffect(() => {
+    console.log(data, 'dataaaa');
     if (
       data &&
       orderData &&
@@ -102,6 +110,18 @@ function User({navigation, route}) {
       }
     }
   }, [data]);
+
+
+  useEffect(()=>{
+      userData.id && database().ref('favourites/' + userData.id).once('value',(e)=>{
+        let val = e.val()
+        let values = Object.values(val)
+        setFavouriteItems(values)
+      })
+  },[userData,favouriteItems])
+
+
+
 
   const getCategoryFromDb = () => {
     database()
@@ -133,6 +153,8 @@ function User({navigation, route}) {
         setItemCategory(a);
       });
   };
+
+console.log(userData,"user")
 
   const getDealsFromDb = () => {
     database()
@@ -342,6 +364,60 @@ function User({navigation, route}) {
     }
   };
 
+  console.log(userData,"user")
+
+const submitFavouriteItem = (item) => {
+
+                if(favouriteItems && favouriteItems.length>0 && favouriteItems.some((e,i)=>e.id == item.id)){
+
+                  setFavouriteItems(favouriteItems.map((e,i)=>{
+                    console.log(e,"ffff")
+                   if(item.itemName == e.itemName) {
+                     return {
+                       ...e,
+                       favourite : e.favourite?false : true
+                     }
+                   }
+                   else {
+                     return e
+                   }
+                  }))
+                }
+
+                else{
+                  item.favourite = true
+                  setFavouriteItems([...favouriteItems,item])
+                }
+
+          //      console.log(item,"itemssss")
+
+          //    if(favouriteItems && favouriteItems.length>0){
+          //      item = favouriteItems.map((e,i)=>{
+                
+          //       if(e.itemName==item.itemName){
+          //         console.log(e,"eeee")
+          //         return {
+          //           ...e,
+          //           favourite : e.favourite?false: true
+          //         }
+          //       }
+          //      })  
+          //    }
+
+          //  else{
+          //  item.favourite = true
+          // }
+
+          // database().ref('favourite/' +  `${userData.id}/` + item.id ).set(item).then(()=>{
+                   
+          //   }).catch((error)=>{
+          //     console.log(error)
+          //   })
+          
+
+}
+
+
   const RenderAllData = useCallback(
     e => {
       return (
@@ -364,6 +440,22 @@ function User({navigation, route}) {
               borderTopRightRadius: 10,
             }}
           />
+          <TouchableOpacity onPress={()=>submitFavouriteItem(e)} style={{position:"absolute",right:15,top:15}} >
+          {favouriteItems && favouriteItems.length>0 ? favouriteItems.map((item,i)=>{
+            if(e.itemName == item.itemName){
+          return <AntDesign name="heart" color="white" size={20} />
+
+            }
+            else{
+             return  <AntDesign name="heart" color="red" size={20} />
+            }
+          })
+          :
+              <AntDesign name="heart" color="white" size={20} />
+
+          
+          }
+          </TouchableOpacity>
           <View
             style={{
               width: 170,
@@ -469,11 +561,11 @@ function User({navigation, route}) {
       bookingData.userData = userData;
       bookingData.paymentMethod = paymentMethod;
 
-      paymentMethod == 'Cash on Delivery' &&  
+      paymentMethod == 'Cash on Delivery' &&
         navigation.navigate('mapScreen', bookingData);
-        setOrderData([])
-        setBookingData(initialData)
-        setVisibleModal(false);
+      setOrderData([]);
+      setBookingData(initialData);
+      setVisibleModal(false);
     } else {
       setVisibleModal(false);
     }
@@ -561,17 +653,15 @@ function User({navigation, route}) {
               renderItem={renderItem}
               style={{marginTop: 10, width: '100%', marginLeft: 20}}
             />
-          ) : (
-            allCategory&&allCategory.length>0?
+          ) : allCategory && allCategory.length > 0 ? (
             <FlatList
               data={allCategory}
               horizontal={true}
               renderItem={renderItem}
               style={{marginTop: 10, width: '100%', marginLeft: 20}}
             />
-            :
+          ) : (
             <ActivityIndicator color="green" size={300} />
-            
           )}
         </View>
 

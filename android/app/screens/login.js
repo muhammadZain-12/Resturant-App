@@ -3,7 +3,7 @@ import {View,Text,StyleSheet,Image, TextInput, TouchableOpacity, ImageBackground
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import pizzaImage from "../assets/pizzaImage.webp"
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Login ({navigation}) {
     const [loader,setLoader] = useState(false)
@@ -21,15 +21,19 @@ const [loginData,setLoginData] = useState({
             setLoader(false)
             const {user} = success
             const val = []
+            let value = ""
             database().ref(`users/`+ user.uid).once('value',(e)=>{
-                let value  = e.val()
-                value.id = user.uid
-                val.push(value)
-            }).then(()=>{
-                console.log(val)
-                let [data] = val
-                let {category} = data                
-                category == "admin"?navigation.navigate('admin',val):navigation.navigate('user',val)
+                 value  = e.val()
+                 value.id = user.uid
+                 val.push(value)
+                }).then(()=>{
+                    let [data] = val
+                    let {category} = data    
+                    console.log(val)
+                    console.log(value,"value")
+                
+                AsyncStorage.setItem("user",JSON.stringify(value))            
+                category == "admin"?navigation.navigate('admin',val):navigation.navigate('tabStack',val)
 
             })
             

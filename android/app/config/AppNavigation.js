@@ -5,30 +5,27 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Login from '../screens/login';
 import Signup from '../screens/signUp';
 import Admin from '../screens/admin';
-import User from '../screens/user';
 import AddMenu from '../screens/addMenu';
 import AddItems from '../screens/addItem';
 import AddDeals from '../screens/addDeals';
 import ViewMenu from '../screens/viewMenu';
 import MenuItemDetail from '../screens/menuItemDetail';
-import auth from '@react-native-firebase/auth';
 import SingleItem from '../screens/singleItemScreen';
 import MapScreen from '../screens/mapScreen';
 import OrderBookedScreen from '../screens/orderBookedScreen';
 import OrderBookingData from '../screens/bookingData';
 import BookedOrderDetail from '../screens/bookedOrderDetailScreen';
+import TabStack from './tabNavigator';
+
+
+
 
 const Stack = createNativeStackNavigator();
 
-const AppNavigation = ({navigation}) => {
-  const signOut = () => {
-    auth()
-      .signOut()
-      .then(() => {
-        ToastAndroid.show('Sign Out Successfully', ToastAndroid.SHORT);
-      });
-  };
 
+
+
+function AppNavigation () {
   return (
     <>
       <NavigationContainer>
@@ -45,15 +42,13 @@ const AppNavigation = ({navigation}) => {
           />
           <Stack.Screen name="admin" component={Admin} />
           <Stack.Screen
-            name="user"
-            component={User}
+            name="tabStack"
+            component={TabStack}
             options={{
               headerStyle: {backgroundColor: 'black'},
               title: 'Home',
               headerTintColor: 'white',
-              headerRight: () => (
-                <Button onPress={signOut} title="Sign Out" color="black" />
-              ),
+
             }}
           />
           <Stack.Screen
@@ -108,6 +103,12 @@ const AppNavigation = ({navigation}) => {
           />
             
         </Stack.Navigator>
+
+
+          
+
+
+
       </NavigationContainer>
     </>
   );

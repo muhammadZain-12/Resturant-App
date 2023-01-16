@@ -1,11 +1,15 @@
 import React, {useCallback, useEffect} from 'react';
-import {View, Text, TouchableOpacity, ToastAndroid} from 'react-native';
+import {View, Text, TouchableOpacity, ToastAndroid, ScrollView} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import database from '@react-native-firebase/database';
 import Header from '../components/header';
 
 function BookedOrderDetail({route, navigation}) {
   const data = route.params;
+
+
+
+console.log(data,"data")
 
   const [bookingData, setBookingData] = React.useState([]);
 
@@ -14,9 +18,10 @@ function BookedOrderDetail({route, navigation}) {
       ...data,
       orderStatus: '',
     });
-  }, []);
+  }, [data]);
 
-  console.log(bookingData);
+  
+console.log(data,"data")
 
   const [orderStatus, setOrderStatus] = React.useState([
     {
@@ -40,6 +45,27 @@ function BookedOrderDetail({route, navigation}) {
       selected: false,
     },
   ]);
+
+
+
+
+useEffect(()=>{
+        setOrderStatus(orderStatus.map((e,i)=>{
+          if(e.orderStatus==data.orderStatus){
+            return {
+              ...e,
+              selected : true
+            }
+          }
+          else{
+            return {
+              ...e,
+              selected:false
+            }
+          }
+        }))
+},[data])
+
 
   const changeOrderStatus = selectedOrderStatus => {
     setOrderStatus(
@@ -75,7 +101,7 @@ function BookedOrderDetail({route, navigation}) {
         <Text style={{marginLeft: 10, fontSize: 16}}>{e.label}</Text>
       </View>
     );
-  }, []);
+  }, [data]);
 
   console.log(data, 'datass');
 
@@ -101,6 +127,12 @@ function BookedOrderDetail({route, navigation}) {
           'Order Status Successfully Submitted',
           ToastAndroid.SHORT,
         );
+
+        setTimeout(() => {
+          navigation.navigate('orderBookedData',bookingData.id)
+        }, 1000);
+
+
       })
       .catch(error => {
         console.log(error, 'error');
@@ -116,6 +148,7 @@ function BookedOrderDetail({route, navigation}) {
         padding: 10,
         paddingHorizontal: 20
       }}>
+      <ScrollView>
       <Header back navigation={navigation}  />
       <View style={{width: '100%', alignItems: 'center'}}>
         <Text
@@ -213,6 +246,7 @@ function BookedOrderDetail({route, navigation}) {
           </TouchableOpacity>
         </View>
       </View>
+        </ScrollView>
     </View>
   );
 }
