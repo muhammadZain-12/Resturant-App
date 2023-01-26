@@ -25,7 +25,7 @@ function SingleItem({route, navigation}) {
   return deal && deal.dealItem ? (
     <View>
       <ScrollView>
-        <Image source={pizza} style={{width: '100%', height: 250}} />
+        <Image source={{uri:deal.imageUri}} style={{width: '100%', height: 250}} />
         <Header
           back
           navigation={navigation}
@@ -82,14 +82,15 @@ function SingleItem({route, navigation}) {
             style={{width: '100%', alignItems: 'center', marginTop: 30}}>
             <Text
               style={{
-                color: 'black',
+                color: 'white',
                 fontSize: 22,
                 textAlign: 'center',
                 marginTop: 20,
                 width: '90%',
-                backgroundColor: 'skyblue',
+                backgroundColor: 'black',
                 padding: 10,
                 borderRadius: 10,
+                fontWeight:"800"
               }}>
               Add To Cart
             </Text>
@@ -101,7 +102,7 @@ function SingleItem({route, navigation}) {
     <View>
       <ScrollView>
         <Image
-          source={item.itemCategory == 'Pizza' ? pizza : coldDrink}
+          source={{uri:item.imageUri}}
           style={{width: '100%', height: 250}}
         />
         <Header
@@ -118,7 +119,7 @@ function SingleItem({route, navigation}) {
               textAlign: 'center',
               fontWeight: '800',
             }}>
-            {item.itemName} {item.itemCategory}
+            {item.itemName} 
           </Text>
           <View style={{width: '100%', flexDirection: 'row', marginTop: 20}}>
             <Text
@@ -228,7 +229,7 @@ function SingleItem({route, navigation}) {
           </View>
         </View>
         <TouchableOpacity
-          onPress={() => navigation.navigate('user', data)}
+          onPress={() => data.favourite ?navigation.navigate('favourite', data) :navigation.navigate('user', data)}
           style={{width: '100%', alignItems: 'center'}}>
           <Text
             style={{

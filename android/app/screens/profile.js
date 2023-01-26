@@ -8,7 +8,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import avatar from '../assets/avatar.jpg';
 import {ActivityIndicator} from 'react-native';
 import database from '@react-native-firebase/database';
-
+import Header from '../components/header';
 
 function Profile({navigation}) {
   const [userData, setUserData] = React.useState([]);
@@ -208,10 +208,18 @@ const routeToOtherPage = (route) => {
     navigation.navigate(route)
 }
 
+const SignOut = () => {
+  navigation.navigate("login")
+}
+
   return (
     <View style={{width: '100%', height: '100%', backgroundColor: '#000'}}>
+      <ScrollView>      
+      <View style={{height:'10%',justifyContent:"center",paddingHorizontal:10}} >
+        <Header buttonOnRight onPress={SignOut} buttonTitle="Sign Out" textOnMiddle middleText="Profile" />
+        </View>
       <View style={{padding: 15}}>
-      <ScrollView>
+      
       <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}} >
         <Text style={{color: 'white', fontSize: 27, fontWeight: '800'}}>
           My Profile
@@ -303,18 +311,14 @@ const routeToOtherPage = (route) => {
             <Text style={{width:"80%"}} >SEE BOOKINGS</Text>
             <AntDesign name="right" size={20}   />
         </TouchableOpacity>
-        <TouchableOpacity onPress={()=>routeToOtherPage('favourite')} style={{width:"90%",padding:20,borderWidth:1,borderColor:"white",borderRadius:10,alignItems:"center",justifyContent:"space-between",flexDirection:"row",marginTop:15}} >
+        <TouchableOpacity onPress={()=>routeToOtherPage('favourite')} style={{width:"90%",padding:20,borderWidth:1,borderColor:"white",borderRadius:10,alignItems:"center",justifyContent:"space-between",flexDirection:"row",marginTop:15,marginBottom:10}} >
             <Text style={{width:"80%"}} >Go TO FAVOURITE</Text>
             <AntDesign name="right" size={20}   />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={()=>routeToOtherPage('reviews')} style={{width:"90%",padding:20,borderWidth:1,borderColor:"white",borderRadius:10,alignItems:"center",justifyContent:"space-between",flexDirection:"row",marginTop:15}} >
-            <Text style={{width:"80%"}} >REVIEWS ITEMS & DEALS</Text>
-            <AntDesign name="right" size={20}   />
-        </TouchableOpacity>
     </View>
-    </ScrollView>
       </View>
+    </ScrollView>
     </View>
   );
 }

@@ -40,39 +40,49 @@ function AppNavigation () {
             name="signUp"
             component={Signup}
           />
-          <Stack.Screen name="admin" component={Admin} />
+          <Stack.Screen name="admin" component={Admin} options={{headerShown :false}} />
           <Stack.Screen
             name="tabStack"
             component={TabStack}
             options={{
-              headerStyle: {backgroundColor: 'black'},
-              title: 'Home',
-              headerTintColor: 'white',
-
+              headerShown : false
             }}
           />
           <Stack.Screen
-            options={{headerShown: false}}
+            options={{
+              headerShown : false
+            }}
             name="addMenu"
             component={AddMenu}
           />
           <Stack.Screen
-            options={{headerShown: false}}
+            options={{
+              headerTitle:"ADD ITEMS",
+              headerTitleAlign:"center",
+            }}
             name="addItem"
             component={AddItems}
           />
           <Stack.Screen
-            options={{headerShown: false}}
+            options={{
+              headerTitle:"ADD DEALS",
+              headerTitleAlign:"center",
+            }}
             name="addDeal"
             component={AddDeals}
           />
           <Stack.Screen
-            options={{headerShown: false}}
+             options={{
+              headerTitle:"",
+              headerTitleAlign:"center",
+            }}
             name="viewMenu"
             component={ViewMenu}
           />
           <Stack.Screen
-            options={{headerShown: false}}
+            options={{
+              headerShown:false
+            }}
             name="menuItemDetail"
             component={MenuItemDetail}
           />

@@ -11,6 +11,7 @@ import database from '@react-native-firebase/database';
 import {TabView, SceneMap} from 'react-native-tab-view';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Header from '../components/header';
 
 function CurrentBookings({navigation, route}) {
   const [currentBooking, setCurrentBooking] = useState([]);
@@ -81,6 +82,11 @@ function CurrentBookings({navigation, route}) {
   useEffect(() => {
     getBookingData();
   }, [userData, routeData]);
+
+
+  const SignOut = () => {
+    navigation.navigate("login")
+  }
 
   const firstRoute = useCallback(() => {
     const renderItem = items => {
@@ -204,6 +210,9 @@ function CurrentBookings({navigation, route}) {
     </View>
   ) : (
     <View style={{backgroundColor: 'black', width: '100%', height: '100%'}}>
+          <View style={{height:'10%',justifyContent:"center",paddingHorizontal:10,marginBottom:20}} >
+        <Header buttonOnRight onPress={SignOut} buttonTitle="Sign Out" textOnMiddle middleText="BOOKINGS" />
+        </View>
       <TabView
         navigationState={{index, routes}}
         renderScene={renderScene}

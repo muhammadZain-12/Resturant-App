@@ -61,7 +61,7 @@ function TabStack() {
           },
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="reviews"
         component={Reviews}
         options={{
@@ -69,7 +69,7 @@ function TabStack() {
             return <Entypo name="star" color={color} size={size} />;
           },
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }

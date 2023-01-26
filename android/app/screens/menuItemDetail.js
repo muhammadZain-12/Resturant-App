@@ -52,12 +52,11 @@ function MenuItemDetail({route, navigation}) {
     })
   }
 
-  console.log(item,"item")
-
+  
   return deal && deal.dealItem ? (
     <View>
     <ScrollView>
-      <Image source={pizza} style={{width: '100%', height: 250}} />
+      <Image source={{uri:deal.imageUri}} style={{width: '100%', height: 250}} />
       <Header back navigation={navigation} style={{position:"absolute",top:10,left:15}} />
       <View style={{padding: 10}}>
         <Text
@@ -149,7 +148,7 @@ function MenuItemDetail({route, navigation}) {
 
     <View>
     <ScrollView>
-    <Image source={item.itemCategory=="Pizza"?pizza : coldDrink} style={{width: '100%', height: 250}} />
+    <Image source={{uri:item.imageUri}} style={{width: '100%', height: 250}} resizeMode="cover" />
     <Header back navigation={navigation} style={{position:"absolute",top:10,left:15}} />
     <View style={{padding: 10}}>
         <Text

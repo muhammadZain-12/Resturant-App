@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   Alert,
   ToastAndroid,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import Header from '../components/header';
+import AntDesign from "react-native-vector-icons/AntDesign"
+import { launchImageLibrary } from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage'; 
 
 function AddItems({navigation}) {
   const initialData = {
@@ -18,11 +22,14 @@ function AddItems({navigation}) {
     itemDescription: '',
     itemSize: '',
     itemPrice: '',
+    imageUri : '',
   };
 
   const [itemDetail, setItemDetail] = React.useState(initialData);
+  const [loading,setLoading] = useState(false)
 
   let modal = {};
+
   const setItemInDb = () => {
     let flag = Object.values(itemDetail);
 
@@ -45,6 +52,38 @@ function AddItems({navigation}) {
     }
   };
 
+const uploadImage = () => {
+  let flag = Object.values(itemDetail) 
+  flag.pop()
+  if(flag.some((e,i)=>e=="")){
+    Alert.alert("Error Alert","First Write Item Name")
+  }
+  else{
+    setLoading(true)
+  launchImageLibrary("photo",(res)=>{
+    const Image = res.assets[0]
+    console.log(Image,"image")
+    if (Image) {
+
+      storage()
+        .ref(`ItemImages/${itemDetail.itemName}/${itemDetail.itemSize}`)
+        .putFile(Image.uri)
+        .then(e => {
+          storage()
+            .ref(`ItemImages/${itemDetail.itemName}/${itemDetail.itemSize}`)
+            .getDownloadURL()
+            .then(URL => {
+              setItemDetail({...itemDetail, imageUri: URL});
+              setLoading(false)
+              
+            });
+        });
+    }
+  })
+}
+}
+
+
   return (
     <View
       style={{
@@ -53,9 +92,6 @@ function AddItems({navigation}) {
         alignItems: 'center',
         backgroundColor: 'white',
       }}>
-      <View style={{position:"absolute",top:10,left:10}} >
-        <Header back navigation={navigation} dark />
-      </View>
       <View>
         <Text
           style={{
@@ -158,6 +194,11 @@ function AddItems({navigation}) {
             color: 'black',
           }}
         />
+        <TouchableOpacity onPress={uploadImage} style={{marginTop:10,width:"100%",alignItems:"center"}} >
+        {loading ? <ActivityIndicator color="black" size="large" /> : 
+          <Text style={{color:"black",width:"90%",padding:12,textAlign:"center",borderColor:"black",borderRadius:10,borderWidth:1,fontSize:18,justifyContent:"center",alignItems:"center",fontWeight:"700"}} >{itemDetail.imageUri ? "Image Uploaded" : "Upload Image"} <AntDesign color="black" name="plus" size={20}   /> </Text>
+        }
+         </TouchableOpacity>
       </View>
 
       <TouchableOpacity

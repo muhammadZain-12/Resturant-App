@@ -102,18 +102,13 @@ function ViewMenu({navigation, route}) {
         <TouchableOpacity
           onPress={() => navigation.navigate('menuItemDetail', item)}
           style={{width: 200, height: 150, borderRadius: 10}}>
-          {item.itemCategory == 'Pizza' ? (
+          
             <Image
-              source={pizza}
+              source={{uri:item.imageUri}}
               style={{width: 200, height: 150, borderRadius: 10}}
-              resizeMode="cover"
+              resizeMode="contain"
             />
-          ) : (
-            <Image
-              source={coldDrink}
-              style={{width: 200, height: 150, borderRadius: 10}}
-            />
-          )}
+          
           <Text
             numberOfLines={1}
             style={{color: 'black', fontSize: 20, marginLeft: 5}}>
@@ -151,7 +146,7 @@ function ViewMenu({navigation, route}) {
           onPress={() => navigation.navigate('menuItemDetail', item)}
           style={{width: 200, height: 150, borderRadius: 10}}>
           <Image
-            source={pizza}
+            source={{uri:item.imageUri}}
             style={{width: 200, height: 150, borderRadius: 10}}
           />
           <Text
@@ -174,7 +169,6 @@ function ViewMenu({navigation, route}) {
   return (
     <View style={{width: '100%', height: '100%', padding: 15,paddingVertical:10}}>
     
-    <Header back dark navigation={navigation}  />
     <ScrollView  >
       <View style={{width: '100%', alignItems: 'center'}}>
         <Text style={{fontSize: 25, color: 'black'}}>Resturant Menu</Text>

@@ -12,17 +12,21 @@ import {
 } from 'react-native';
 import database from '@react-native-firebase/database';
 import Header from '../components/header';
+import {launchImageLibrary} from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
 
 function AddDeals({navigation, route}) {
   const [items, setItems] = React.useState([]);
   const [dealItems, setDealItems] = React.useState([]);
   const [routeData, setRouteData] = React.useState([]);
   const [data, setData] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const initialData = {
     dealName: '',
     dealItem: [],
     dealPrice: '',
+    imageUri: '',
   };
 
   const [dealDetail, setdealDetail] = React.useState(initialData);
@@ -88,7 +92,6 @@ function AddDeals({navigation, route}) {
   };
 
   const RenderItem = ({item}) => {
-    console.log(myData, 'data');
     return (
       <TouchableOpacity
         onPress={() =>
@@ -170,10 +173,8 @@ function AddDeals({navigation, route}) {
   };
 
   const AddEditDealItem = (e, i) => {
-    console.log(i, i);
     setRouteData(
       routeData.map((value, ind) => {
-        console.log(ind, 'index');
         if (ind === i) {
           return {
             ...e,
@@ -187,8 +188,6 @@ function AddDeals({navigation, route}) {
   };
 
   const lessEditDealItem = (value, ind) => {
-    console.log(value, 'value');
-
     if (value.count == 1) {
       setRouteData(
         routeData.filter((e, i) => {
@@ -228,162 +227,215 @@ function AddDeals({navigation, route}) {
       });
   };
 
-  return (
-    <View style={{width: '100%', height: '100%', alignItems: 'center'}}>
-      <Header
-        back
-        navigation={navigation}
-        dark
-        style={{marginLeft: 15, marginTop: 5}}
-      />
-
-      <Text
-        style={{
-          color: 'black',
-          padding: 10,
-          fontSize: 28,
-          textAlign: 'center',
-          fontWeight: '600',
-        }}>
-        Add Deals
-      </Text>
-
-      <TextInput
-        onChangeText={e =>
-          data && data.dealItem
-            ? setData({...data, dealName: e})
-            : setdealDetail({...dealDetail, dealName: e})
+  const uploadImage = () => {
+    if (dealDetail.dealName && dealDetail.dealPrice) {
+      launchImageLibrary('photo', Response => {
+        setLoading(true);
+        const image = Response.assets[0];
+        if (image) {
+          storage()
+            .ref(`dealImages/${dealDetail.dealName}`)
+            .putFile(image.uri)
+            .then(e => {
+              storage()
+                .ref(`dealImages/${dealDetail.dealName}`)
+                .getDownloadURL()
+                .then(URL => {
+                  setdealDetail({...dealDetail, imageUri: URL});
+                  setLoading(false);
+                });
+            });
         }
-        placeholder={data ? data.dealName : 'Deal Name'}
-        value={data ? data.dealName : dealDetail.dealName}
-        placeholderTextColor="black"
-        style={{
-          color: 'black',
-          borderWidth: 1,
-          borderColor: 'black',
-          width: '90%',
-          borderRadius: 10,
-          padding: 10,
-          fontSize: 20,
-        }}
-      />
+      });
+    } else {
+      Alert.alert('Error Alert', 'First Fill Above Fields');
+    }
+  };
 
-      <Text
-        style={{color: 'black', marginTop: 10, textTransform: 'capitalize'}}>
-        Select below items to add in deals
-      </Text>
-
-      {items && items.length > 0 ? (
-        <FlatList
-          data={items}
-          renderItem={RenderItem}
-          scrollEnabled={true}
-          horizontal={false}
+  return (
+    <ScrollView style={{width: '100%', height: '100%'}}>
+      <View style={{width: '100%', height: '100%', alignItems: 'center'}}>
+        <Text
           style={{
-            height: 200,
-            maxHeight: 200,
+            color: 'black',
+            padding: 10,
+            fontSize: 28,
+            textAlign: 'center',
+            fontWeight: '600',
+          }}>
+          Add Deals
+        </Text>
+
+        <TextInput
+          onChangeText={e =>
+            data && data.dealItem
+              ? setData({...data, dealName: e})
+              : setdealDetail({...dealDetail, dealName: e})
+          }
+          placeholder={data ? data.dealName : 'Deal Name'}
+          value={data ? data.dealName : dealDetail.dealName}
+          placeholderTextColor="black"
+          style={{
+            color: 'black',
+            borderWidth: 1,
+            borderColor: 'black',
             width: '90%',
+            borderRadius: 10,
+            padding: 10,
+            fontSize: 20,
           }}
         />
-      ) : (
-        <ActivityIndicator size={200} color="skyblue" />
-      )}
-      <View style={{height: 200, width: '100%'}}>
-        <ScrollView style={{width: '100%', height: 100}}>
-          {data && data.dealItem
-            ? routeData.map((e, i) => {
-                return (
-                  <TouchableOpacity
-                    key={i}
-                    style={{
-                      width: '100%',
-                      backgroundColor: 'aqua',
-                      padding: 10,
-                      marginTop: 10,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <Text style={{color: 'black', width: '60%'}}>
-                      {e.count} {e.itemName} {e.itemSize}
-                    </Text>
-                    <View style={{flexDirection: 'row'}}>
-                      <TouchableOpacity onPress={() => AddEditDealItem(e, i)}>
-                        <Text style={{color: 'white', fontSize: 34}}> + </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => lessEditDealItem(e, i)}>
-                        <Text style={{color: 'white', fontSize: 34}}> - </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })
-            : dealItems &&
-              dealItems.length > 0 &&
-              dealItems.map((e, i) => {
-                return (
-                  <TouchableOpacity
-                    key={i}
-                    style={{
-                      width: '100%',
-                      backgroundColor: 'aqua',
-                      padding: 10,
-                      marginTop: 10,
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}>
-                    <Text style={{color: 'black', width: '60%'}}>
-                      {e.count} {e.itemName} {e.itemSize}
-                    </Text>
-                    <View style={{flexDirection: 'row'}}>
-                      <TouchableOpacity onPress={() => AddItem(e, i)}>
-                        <Text style={{color: 'white', fontSize: 34}}> + </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => lessItem(e, i)}>
-                        <Text style={{color: 'white', fontSize: 34}}> - </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-        </ScrollView>
-      </View>
-      <TextInput
-        onChangeText={e =>
-          data && data.dealItem
-            ? setData({...data, dealPrice: e})
-            : setdealDetail({...dealDetail, dealPrice: e})
-        }
-        placeholder={data && data.length > 0 ? data.dealPrice : 'Deal Price'}
-        value={data ? data.dealPrice : dealDetail.dealPrice}
-        placeholderTextColor="black"
-        style={{
-          color: 'black',
-          borderWidth: 1,
-          borderColor: 'black',
-          width: '90%',
-          borderRadius: 10,
-          padding: 10,
-          fontSize: 20,
-          marginTop: 10,
-          marginBottom: 10,
-        }}
-      />
-      <TouchableOpacity
-        onPress={data ? editDealDataInDb : dealSubmittedToDb}
-        style={{
-          width: '100%',
-          position: 'absolute',
-          bottom: 20,
-          backgroundColor: 'skyblue',
-          padding: 20,
-        }}>
-        <Text style={{color: 'black', textAlign: 'center', fontSize: 20}}>
-          {data ? 'Edit Deal' : 'ADD DEAL'}
+        <TextInput
+          onChangeText={e =>
+            data && data.dealItem
+              ? setData({...data, dealPrice: e})
+              : setdealDetail({...dealDetail, dealPrice: e})
+          }
+          placeholder={data && data.length > 0 ? data.dealPrice : 'Deal Price'}
+          value={data ? data.dealPrice : dealDetail.dealPrice}
+          placeholderTextColor="black"
+          style={{
+            color: 'black',
+            borderWidth: 1,
+            borderColor: 'black',
+            width: '90%',
+            borderRadius: 10,
+            padding: 10,
+            fontSize: 20,
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+        />
+        <TouchableOpacity
+          onPress={uploadImage}
+          style={{width: '100%', alignItems: 'center'}}>
+          {loading ? (
+            <ActivityIndicator color="black" size="large" />
+          ) : (
+            <Text
+              style={{
+                width: '90%',
+                color: 'black',
+                textAlign: 'center',
+                borderWidth: 1,
+                borderColor: 'black',
+                padding: 10,
+                fontSize: 20,
+                borderRadius: 10,
+              }}>
+              {dealDetail.imageUri ? 'Image Uploaded' : 'Upload Image'}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <Text
+          style={{color: 'black', marginTop: 10, textTransform: 'capitalize'}}>
+          Select below items to add in deals
         </Text>
-      </TouchableOpacity>
-    </View>
+
+        {items && items.length > 0 ? (
+          <FlatList
+            data={items}
+            renderItem={RenderItem}
+            scrollEnabled={true}
+            horizontal={false}
+            style={{
+              height: 200,
+              maxHeight: 200,
+              width: '90%',
+            }}
+          />
+        ) : (
+          <ActivityIndicator size={200} color="skyblue" />
+        )}
+        <View style={{height: 200, width: '100%'}}>
+          <ScrollView style={{width: '100%', height: 50}}>
+            {data && data.dealItem
+              ? routeData.map((e, i) => {
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'aqua',
+                        padding: 10,
+                        marginTop: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                      <Text style={{color: 'black', width: '60%'}}>
+                        {e.count} {e.itemName} {e.itemSize}
+                      </Text>
+                      <View style={{flexDirection: 'row'}}>
+                        <TouchableOpacity onPress={() => AddEditDealItem(e, i)}>
+                          <Text style={{color: 'white', fontSize: 34}}>
+                            {' '}
+                            +{' '}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => lessEditDealItem(e, i)}>
+                          <Text style={{color: 'white', fontSize: 34}}>
+                            {' '}
+                            -{' '}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })
+              : dealItems &&
+                dealItems.length > 0 &&
+                dealItems.map((e, i) => {
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'aqua',
+                        padding: 10,
+                        marginTop: 10,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                      <Text style={{color: 'black', width: '60%'}}>
+                        {e.count} {e.itemName} {e.itemSize}
+                      </Text>
+                      <View style={{flexDirection: 'row'}}>
+                        <TouchableOpacity onPress={() => AddItem(e, i)}>
+                          <Text style={{color: 'white', fontSize: 34}}>
+                            {' '}
+                            +{' '}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => lessItem(e, i)}>
+                          <Text style={{color: 'white', fontSize: 34}}>
+                            {' '}
+                            -{' '}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+            <TouchableOpacity
+              onPress={data ? editDealDataInDb : dealSubmittedToDb}
+              style={{
+                width: '100%',
+                backgroundColor: 'skyblue',
+                padding: 20,
+                marginTop: 20,
+              }}>
+              <Text style={{color: 'black', textAlign: 'center', fontSize: 20}}>
+                {data ? 'Edit Deal' : 'ADD DEAL'}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 

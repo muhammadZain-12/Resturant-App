@@ -87,9 +87,9 @@ function SignUp({navigation}) {
 
   return ( 
     <View style={styles.container} >
-     <ImageBackground source={pizzaImage} style={{width:"100%",height:"100%"}} resizeMode="cover" >   
+        
     
-     <View style={{width:"100%",height:"100%",justifyContent:"center",backgroundColor:"rgba(130,130,130,0.7)"}} >
+     <View style={{width:"100%",height:"100%",justifyContent:"center",backgroundColor:"black"}} >
      <View style={{justifyContent:"flex-start",height:"75%"}} >
      
     <View style={{width:"90%",alignItems:"center"}} >
@@ -97,7 +97,7 @@ function SignUp({navigation}) {
         Sign Up!
     </Text>
     <Text style={{color:"white",textAlign:"left",width:"87%",fontSize:15}} >
-        Register to enjoy safe and sound journey
+        Register to enjoy your favourite Food
     </Text>
     </View>
     <View style={{flexDirection:"row",justifyContent:"center",marginTop:30}} >
@@ -131,7 +131,7 @@ function SignUp({navigation}) {
     </View>
     </View>
     </View>
-    </ImageBackground>
+    
     </View>
 )
 }
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   text: {
-    color: 'black',
+    color: 'white',
     fontSize: 16,
     fontWeight: '700',
   },

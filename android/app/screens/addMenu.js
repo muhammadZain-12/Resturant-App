@@ -4,17 +4,15 @@ import Header from "../components/header"
 
 function AddMenu ({navigation}) {
     return(
-        <View style={{width:"100%",height:"100%",justifyContent:"center",backgroundColor:'aqua'}} >
-                <View style={{position:"absolute",top:10,left:15}} >
-                <Header back dark navigation={navigation} />
-                </View>
-            <Text style={{color:"black",textAlign:"center",fontSize:24,fontWeight:"700"}} >
-                Add Menu
-            </Text>
-            <Text style={{color:"black",textAlign:"center",fontSize:18,fontWeight:"600"}}  >
+        <View style={{width:"100%",height:"100%",justifyContent:"center",backgroundColor:'black'}} >
+        <View style={{position:"absolute",top:10,width:"100%"}} >
+        <Header back textOnMiddle  middleText="Add Menu" navigation={navigation} />
+        </View>
+
+            <Text style={{textAlign:"center",fontSize:20,fontWeight:"600",color:"white"}}  >
                 Want to Add Items & Deals
             </Text>
-            <Text style={{color:"black",textAlign:"center",fontSize:16,fontWeight:"500"}}  >
+            <Text style={{textAlign:"center",fontSize:16,fontWeight:"500"}}  >
                 Kindly select from below
             </Text>
 
@@ -25,7 +23,7 @@ function AddMenu ({navigation}) {
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>navigation.navigate('addDeal')}  style={{width:"90%",backgroundColor:"skyblue",padding:15,borderRadius:15,marginTop:20}} >
-                <Text style={{color:"black",fontWeight:"700",textAlign:"center",fontSize:20}} >
+                <Text style={{color:"black",fontWeight:"700",textAlign:"center",fontSize:20}}>
                         Add Deals
                     </Text>
                 </TouchableOpacity>

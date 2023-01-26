@@ -8,8 +8,6 @@ import {
   Image,
   Dimensions,
   ScrollView,
-  ViewBase,
-  ToastAndroid,
   ActivityIndicator,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
@@ -18,13 +16,12 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import pizza from '../assets/pizza.webp';
 import coldDrink from '../assets/coldDrink.jpg';
 import AppModal from '../components/modal';
-import AntDesign from "react-native-vector-icons/AntDesign"
-
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Header from '../components/header';
 
 function User({navigation, route}) {
   let data = route.params;
 
-  
   const [userData, setUserData] = React.useState([]);
   const [itemCategory, setItemCategory] = React.useState({
     title: '',
@@ -45,8 +42,9 @@ function User({navigation, route}) {
   const [orderData, setOrderData] = React.useState([]);
   const [visibleModal, setVisibleModal] = React.useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = React.useState('');
-  const [favouriteItems,setFavouriteItems] = React.useState([])
-  
+  const [favouriteItems, setFavouriteItems] = React.useState([]);
+  const [reload, setReload] = React.useState(false);
+
   const initialData = {
     orderData: [],
     orderPrice: '',
@@ -55,21 +53,19 @@ function User({navigation, route}) {
     userData: '',
   };
 
-  console.log(userData,"user")
-
   const [bookingData, setBookingData] = React.useState(initialData);
 
   useEffect(() => {
     auth().onAuthStateChanged(user => {
       if (user) {
         const {uid} = user;
-        setUserData({...userData,id:uid})
 
         database()
           .ref('users/' + uid)
           .once('value', e => {
             let val = e.val();
-            setUserData(val);
+
+            setUserData({...val, id: uid});
           });
       } else {
         navigation.navigate('login');
@@ -83,7 +79,6 @@ function User({navigation, route}) {
   }, []);
 
   useEffect(() => {
-    console.log(data, 'dataaaa');
     if (
       data &&
       orderData &&
@@ -92,7 +87,6 @@ function User({navigation, route}) {
     ) {
       setOrderData(
         orderData.map((e, i) => {
-          console.log(e, 'eeee');
           if (e.id == data.id) {
             return {
               ...e,
@@ -111,17 +105,17 @@ function User({navigation, route}) {
     }
   }, [data]);
 
+  useEffect(() => {
+    userData.id &&
+      database()
+        .ref('favourite/' + userData.id)
+        .once('value', e => {
+          let val = e.val();
+          let values = Object.values(val);
 
-  useEffect(()=>{
-      userData.id && database().ref('favourites/' + userData.id).once('value',(e)=>{
-        let val = e.val()
-        let values = Object.values(val)
-        setFavouriteItems(values)
-      })
-  },[userData,favouriteItems])
-
-
-
+          setFavouriteItems(values);
+        });
+  }, [userData, reload]);
 
   const getCategoryFromDb = () => {
     database()
@@ -153,8 +147,6 @@ function User({navigation, route}) {
         setItemCategory(a);
       });
   };
-
-console.log(userData,"user")
 
   const getDealsFromDb = () => {
     database()
@@ -267,10 +259,13 @@ console.log(userData,"user")
           borderWidth: 1,
           borderRadius: 20,
           padding: 10,
-          backgroundColor: item.active ? '#8888ee' : 'black',
-        }}>
+          backgroundColor: item.active ? '#8888ee' : 'white',
+          marginLeft: 5,
+        }}
+      >
         <Text
-          style={{color: item.active ? 'black' : 'white', textAlign: 'center'}}>
+          style={{color: item.active ? 'white' : 'black', textAlign: 'center'}}
+        >
           {item.title}
         </Text>
       </TouchableOpacity>
@@ -296,9 +291,7 @@ console.log(userData,"user")
   let index = 0;
 
   const getOrderFromUser = item => {
-    console.log(item, 'item');
     let flag = orderData.some((e, i) => {
-      console.log(e.id, item.id);
       return e.id == item.id;
     });
 
@@ -325,8 +318,6 @@ console.log(userData,"user")
   };
 
   const addItems = item => {
-    console.log(item);
-
     setOrderData(
       orderData.map((e, i) => {
         if (e.id == item.id) {
@@ -364,59 +355,62 @@ console.log(userData,"user")
     }
   };
 
-  console.log(userData,"user")
+  const submitFavouriteItem = item => {
+    if (
+      favouriteItems &&
+      favouriteItems.length > 0 &&
+      favouriteItems.some((e, i) => e.id == item.id)
+    ) {
+      setFavouriteItems(
+        favouriteItems.map((e, i) => {
+          if (item.id == e.id) {
+            return {
+              ...e,
+              favourite: e.favourite ? false : true,
+            };
+          } else {
+            return e;
+          }
+        }),
+      );
+    } else {
+      item.favourite = true;
+      setFavouriteItems([...favouriteItems, item]);
+    }
 
-const submitFavouriteItem = (item) => {
+    if (
+      favouriteItems &&
+      favouriteItems.length > 0 &&
+      favouriteItems.some((e, i) => e.id == item.id)
+    ) {
+      item = favouriteItems
+        .map((e, i) => {
+          if (e.id == item.id) {
+            return {
+              ...e,
+              favourite: e.favourite ? false : true,
+            };
+          } else {
+            return false;
+          }
+        })
+        .filter(Boolean);
+    }
 
-                if(favouriteItems && favouriteItems.length>0 && favouriteItems.some((e,i)=>e.id == item.id)){
+    if (Array.isArray(item)) {
+      item = item[0];
+    }
 
-                  setFavouriteItems(favouriteItems.map((e,i)=>{
-                    console.log(e,"ffff")
-                   if(item.itemName == e.itemName) {
-                     return {
-                       ...e,
-                       favourite : e.favourite?false : true
-                     }
-                   }
-                   else {
-                     return e
-                   }
-                  }))
-                }
-
-                else{
-                  item.favourite = true
-                  setFavouriteItems([...favouriteItems,item])
-                }
-
-          //      console.log(item,"itemssss")
-
-          //    if(favouriteItems && favouriteItems.length>0){
-          //      item = favouriteItems.map((e,i)=>{
-                
-          //       if(e.itemName==item.itemName){
-          //         console.log(e,"eeee")
-          //         return {
-          //           ...e,
-          //           favourite : e.favourite?false: true
-          //         }
-          //       }
-          //      })  
-          //    }
-
-          //  else{
-          //  item.favourite = true
-          // }
-
-          // database().ref('favourite/' +  `${userData.id}/` + item.id ).set(item).then(()=>{
-                   
-          //   }).catch((error)=>{
-          //     console.log(error)
-          //   })
-          
-
-}
-
+    database()
+      .ref('favourite/' + `${userData.id}/` + item.id)
+      .set(item)
+      .then(() => {
+        console.log('data successfully set', item);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
   const RenderAllData = useCallback(
     e => {
@@ -430,9 +424,10 @@ const submitFavouriteItem = (item) => {
             padding: 5,
             marginBottom: 5,
             borderRadius: 10,
-          }}>
+          }}
+        >
           <Image
-            source={e.itemCategory == 'Cold drink' ? coldDrink : pizza}
+            source={{uri:e.imageUri}}
             style={{
               width: 170,
               height: 120,
@@ -440,21 +435,25 @@ const submitFavouriteItem = (item) => {
               borderTopRightRadius: 10,
             }}
           />
-          <TouchableOpacity onPress={()=>submitFavouriteItem(e)} style={{position:"absolute",right:15,top:15}} >
-          {favouriteItems && favouriteItems.length>0 ? favouriteItems.map((item,i)=>{
-            if(e.itemName == item.itemName){
-          return <AntDesign name="heart" color="white" size={20} />
-
+          <TouchableOpacity
+            onPress={() => submitFavouriteItem(e)}
+            style={{position: 'absolute', right: 15, top: 15}}
+          >
+            {
+              <AntDesign
+                name="heart"
+                color={
+                  favouriteItems &&
+                  favouriteItems.length > 0 &&
+                  favouriteItems.some(
+                    (items, i) => e.id == items.id && items.favourite,
+                  )
+                    ? 'red'
+                   : 'purple'
+                }
+                size={25}
+              />
             }
-            else{
-             return  <AntDesign name="heart" color="red" size={20} />
-            }
-          })
-          :
-              <AntDesign name="heart" color="white" size={20} />
-
-          
-          }
           </TouchableOpacity>
           <View
             style={{
@@ -464,7 +463,8 @@ const submitFavouriteItem = (item) => {
               borderBottomLeftRadius: 10,
               borderBottomRightRadius: 10,
               paddingTop: 3,
-            }}>
+            }}
+          >
             <Text
               style={{
                 color: 'white',
@@ -473,7 +473,8 @@ const submitFavouriteItem = (item) => {
                 fontWeight: '700',
                 fontSize: 18,
               }}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {e.dealName ? e.dealName : e.itemName}
             </Text>
             <Text
@@ -484,7 +485,8 @@ const submitFavouriteItem = (item) => {
                 fontSize: 16,
                 fontWeight: '500',
               }}
-              numberOfLines={1}>
+              numberOfLines={1}
+            >
               {e.dealPrice ? e.dealPrice : e.itemPrice}
             </Text>
             <View style={{alignItems: 'center', marginVertical: 5}}>
@@ -495,13 +497,15 @@ const submitFavouriteItem = (item) => {
                   padding: 10,
                   borderRadius: 10,
                   width: '90%',
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     textAlign: 'center',
                     color: 'white',
                     fontWeight: '700',
-                  }}>
+                  }}
+                >
                   Add to Cart
                 </Text>
               </TouchableOpacity>
@@ -510,7 +514,7 @@ const submitFavouriteItem = (item) => {
         </TouchableOpacity>
       );
     },
-    [allData, orderData],
+    [allData, orderData, favouriteItems, userData, reload],
   );
 
   let b = 0;
@@ -548,10 +552,6 @@ const submitFavouriteItem = (item) => {
     setVisibleModal(true);
   };
 
-  if (bookingData.orderData.length > 0) {
-    console.log('myname');
-  }
-
   const closeModal = paymentMethod => {
     if (paymentMethod) {
       setSelectedPaymentMethod(paymentMethod);
@@ -571,20 +571,41 @@ const submitFavouriteItem = (item) => {
     }
   };
 
-  return (
-    <View>
+  const SignOut = () => {
+    navigation.navigate('login');
+  };
+
+  return allData && allData.length > 0 ? (
+    <View style={{backgroundColor: 'black', width: '100%', height: '100%'}}>
       <ScrollView>
+        <View
+          style={{
+            height: '5%',
+            justifyContent: 'center',
+            paddingHorizontal: 10,
+          }}
+        >
+          <Header
+            buttonOnRight
+            onPress={SignOut}
+            buttonTitle="Sign Out"
+            textOnMiddle
+            middleText="Home"
+          />
+        </View>
         <View style={{width: '100%', alignItems: 'center', marginTop: 10}}>
           <View
             style={{
               width: '90%',
               borderWidth: 1,
-              borderColor: 'black',
+              borderColor: 'white',
               borderRadius: 15,
               alignItems: 'center',
               flexDirection: 'row',
               justifyContent: 'space-around',
-            }}>
+              backgroundColor: 'white',
+            }}
+          >
             <TextInput
               style={{width: '80%', color: 'black', fontSize: 18}}
               placeholder="What do you want?"
@@ -595,13 +616,15 @@ const submitFavouriteItem = (item) => {
               <Icon name="search1" size={30} color={'black'} />
             </TouchableOpacity>
           </View>
+
           <View
             style={{
               flexDirection: 'row',
               width: '100%',
               margin: 10,
               justifyContent: 'center',
-            }}>
+            }}
+          >
             <TouchableOpacity
               onPress={() => selectMainCategory('items')}
               style={{
@@ -610,13 +633,15 @@ const submitFavouriteItem = (item) => {
                 borderRadius: 20,
                 padding: 10,
                 marginLeft: 10,
-                backgroundColor: mainCategory.items ? '#8888ee' : 'black',
-              }}>
+                backgroundColor: mainCategory.items ? '#8888ee' : 'white',
+              }}
+            >
               <Text
                 style={{
-                  color: mainCategory.items ? 'black' : 'white',
+                  color: mainCategory.items ? 'white' : 'black',
                   textAlign: 'center',
-                }}>
+                }}
+              >
                 ITEMS
               </Text>
             </TouchableOpacity>
@@ -628,13 +653,15 @@ const submitFavouriteItem = (item) => {
                 borderRadius: 20,
                 padding: 10,
                 marginLeft: 10,
-                backgroundColor: mainCategory.deals ? '#8888ee' : 'black',
-              }}>
+                backgroundColor: mainCategory.deals ? '#8888ee' : 'white',
+              }}
+            >
               <Text
                 style={{
-                  color: mainCategory.deals ? 'black' : 'white',
+                  color: mainCategory.deals ? 'white' : 'black',
                   textAlign: 'center',
-                }}>
+                }}
+              >
                 DEALS
               </Text>
             </TouchableOpacity>
@@ -665,12 +692,23 @@ const submitFavouriteItem = (item) => {
           )}
         </View>
 
+        <View style={{marginTop: 20, alignItems: 'flex-end', marginRight: 10}}>
+          <TouchableOpacity
+            onPress={() => setReload(!reload)}
+            style={{marginRight: 30}}
+          >
+            <Icon name="reload1" color="white" size={25} />
+          </TouchableOpacity>
+          <Text>Tap To Reload</Text>
+        </View>
+
         <View
           style={{
             marginTop: 10,
             alignItems: 'center',
             backgroundColor: 'lightblue',
-          }}>
+          }}
+        >
           {orderData && orderData.length > 0 && (
             <Text
               style={{
@@ -678,7 +716,8 @@ const submitFavouriteItem = (item) => {
                 textAlign: 'center',
                 fontWeight: '800',
                 color: 'black',
-              }}>
+              }}
+            >
               Your Order
             </Text>
           )}
@@ -694,10 +733,12 @@ const submitFavouriteItem = (item) => {
                     padding: 10,
                     flexDirection: 'row',
                     justifyContent: 'space-between',
-                  }}>
+                  }}
+                >
                   <Text
                     numberOfLines={1}
-                    style={{color: 'black', fontSize: 18}}>
+                    style={{color: 'black', fontSize: 18}}
+                  >
                     {' '}
                     {e.count} {e.itemName ?? e.dealName} {e.itemSize}{' '}
                   </Text>
@@ -706,14 +747,16 @@ const submitFavouriteItem = (item) => {
                       flexDirection: 'row',
                       width: '20%',
                       justifyContent: 'space-between',
-                    }}>
+                    }}
+                  >
                     <TouchableOpacity onPress={() => addItems(e)}>
                       <Text
                         style={{
                           color: 'black',
                           fontSize: 20,
                           fontWeight: '800',
-                        }}>
+                        }}
+                      >
                         {' '}
                         +{' '}
                       </Text>
@@ -725,7 +768,8 @@ const submitFavouriteItem = (item) => {
                           color: 'black',
                           fontSize: 20,
                           fontWeight: '800',
-                        }}>
+                        }}
+                      >
                         {' '}
                         -{' '}
                       </Text>
@@ -752,14 +796,16 @@ const submitFavouriteItem = (item) => {
                   borderRadius: 10,
                   marginBottom: 10,
                 }}
-                onPress={orderPlaceForBooking}>
+                onPress={orderPlaceForBooking}
+              >
                 <Text
                   style={{
                     color: 'white',
                     fontWeigth: '600',
                     fontSize: 20,
                     textAlign: 'center',
-                  }}>
+                  }}
+                >
                   Place Order
                 </Text>
               </TouchableOpacity>
@@ -779,7 +825,8 @@ const submitFavouriteItem = (item) => {
                 flexWrap: 'wrap',
                 flexDirection: 'row',
                 marginTop: 20,
-              }}>
+              }}
+            >
               {itemCategory &&
                 itemCategory.length > 0 &&
                 itemCategory.map((e, i) => {
@@ -836,7 +883,8 @@ const submitFavouriteItem = (item) => {
                 flexWrap: 'wrap',
                 flexDirection: 'row',
                 marginTop: 20,
-              }}>
+              }}
+            >
               {dealName &&
                 dealName.length > 0 &&
                 dealName.map((e, i) => {
@@ -886,7 +934,8 @@ const submitFavouriteItem = (item) => {
                 flexWrap: 'wrap',
                 flexDirection: 'row',
                 marginTop: 20,
-              }}>
+              }}
+            >
               {allCategory &&
                 allCategory.length > 0 &&
                 allCategory.map((e, i) => {
@@ -946,6 +995,10 @@ const submitFavouriteItem = (item) => {
           ''
         )}
       </ScrollView>
+    </View>
+  ) : (
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+      <ActivityIndicator size={250} color="black" />
     </View>
   );
 }
